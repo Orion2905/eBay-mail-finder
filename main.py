@@ -37,7 +37,7 @@ class EbayEmailBot:
         # self.db = Database()
 
         import os
-        os.environ['GH_TOKEN'] = "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"
+        os.environ['GH_TOKEN'] = "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"
 
         driver = GeckoDriverManager().install()
         service = Service(driver)
@@ -150,11 +150,22 @@ class EbayEmailBot:
             "Seller Email": seller_email(),
             "Seller Phone": seller_phone(),
         }
+    
+    def write_on_csv(self, product=[]):
+        file_name = "contacts.csv"
+        path = os.getcwd()
+        file_list = os.listdir(path)
+        if file_name not in file_list:
+            with open(file_name, "w") as f:
+                pass
+        else:
+            with open(file_name, "a") as f:
+                f.write(f"{product['Seller Name']};{product['Seller Reviews']};{product['Seller Email']};{product['Seller Phone']}\n")
 
     def bot(self):
         url = "https://www.ebay.it/e/campagne-speciali/informatica-settembre23?rt=nc&LH_SellerWithStore=1"
         self.get_url(url)
-
+        self.write_on_csv()
         for i in range(2, 10, 1):
             # Ottieni il numero di prodotti in quella pagina
             products = self.driver.find_elements(By.CSS_SELECTOR, '[class="s-item__info clearfix"]')
@@ -163,13 +174,14 @@ class EbayEmailBot:
                 product = product.split('href="')[1].split('"')[0]
                 self.open_url_new_page(product)
                 time.sleep(3)
-                print(self.get_products())
+                product = self.get_products()
+                self.write_on_csv(product)
                 time.sleep(2)
                 self.driver.close()
                 test2 = self.driver.window_handles[0]
                 self.driver.switch_to.window(test2)
             
-            self.get_url(url+"&_pgn="+i)
+            self.get_url(url+"&_pgn="+str(i))
 
 
 
@@ -183,26 +195,3 @@ a.get_url(a.MAIN_URL)
 a.accept_cookies()
 a.bot()
 a.close_browser()
-
-''''data = Database().select_where(table="status", clausole="status = 'STARTING'")
-Database().update_user(table="status", col="status", data="WORKIGN", col2="status", data2="STARTING")
-print(data)
-try:
-    bot_type = data[0][8]
-    if bot_type == "Normale":
-        bot_type = 0
-    else:
-        bot_type = 1
-
-    page_number = data[0][5]
-    category = data[0][6]
-
-    urls = data[0][7]
-    bot = AmazonBot()
-    bot.get_url(urls)
-    bot.accept_cookies()
-    bot.bot(category=category.split(", ")[0], type=category.split(", ")[1], db_mode=bot_type, time_to_scroll=page_number)
-    time.sleep(300)
-    bot.close_browser()
-except Exception as e:
-    print("Nessun bot è in fase di lancio al momento!", e)'''
